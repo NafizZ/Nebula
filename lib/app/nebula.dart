@@ -7,8 +7,11 @@ class Nebula extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.green[50],
+      ),
       home: UploadPage(),
     );
   }
-
 }
