@@ -1,24 +1,48 @@
+import 'package:nebula/features/ai_assistant/domain/entities/pdf_entity.dart';
+import 'package:nebula/features/ai_assistant/domain/repositories/pdf_repository.dart';
 import 'package:nebula/features/ai_assistant/data/datasources/pdf_local_datasource.dart';
 import 'package:nebula/features/ai_assistant/data/models/pdf_model.dart';
 
-class PdfRepositoryImpl {
+class PdfRepositoryImpl implements PdfRepository {
   final PdfLocalDatasource local;
 
   PdfRepositoryImpl(this.local);
 
-  Future<int> insertPdf(PdfModel pdf) {
-    return local.insertPdf(pdf);
+  // 🔄 Entity → Model
+  PdfModel _toModel(PdfEntity pdf) {
+    return PdfModel(
+      id: pdf.id,
+      name: pdf.name,
+      path: pdf.path,
+      lastOpened: pdf.lastOpened,
+      lastPage: pdf.lastPage,
+    );
   }
 
-  Future<List<PdfModel>> getAllPdfs() {
-    return local.getAllPdfs();
+  // 🔄 Model → Entity
+  PdfEntity _toEntity(PdfModel model) {
+    return PdfEntity(
+      id: model.id,
+      name: model.name,
+      path: model.path,
+      lastOpened: model.lastOpened,
+      lastPage: model.lastPage,
+    );
   }
 
-  Future updateLastPage(int id, int page) {
-    return local.updateLastPage(id, page);
+  @override
+  Future<int> insertPdf(PdfEntity pdf) {
+    return local.insertPdf(_toModel(pdf));
   }
 
-  Future deletePdf(int id) {
+  @override
+  Future<List<PdfEntity>> getAllPdfs() async {
+    final result = await local.getAllPdfs();
+    return result.map(_toEntity).toList();
+  }
+
+  @override
+  Future<void> deletePdf(int id) {
     return local.deletePdf(id);
   }
 }
