@@ -33,10 +33,17 @@ dependencies:
   cupertino_icons: ^1.0.8
   file_picker: ^11.0.2
   syncfusion_flutter_pdfviewer: ^33.1.47
+  drift: ^2.32.1
+  sqlite3_flutter_libs: ^0.6.0+eol
+  path_provider: ^2.1.5
+  path: ^1.9.1
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  drift_dev: ^2.32.1
+  build_runner: ^2.13.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
