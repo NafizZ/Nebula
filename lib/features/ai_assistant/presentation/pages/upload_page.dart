@@ -1,4 +1,6 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:nebula/features/ai_assistant/presentation/pages/preview_page.dart';
 
 class UploadPage extends StatefulWidget {
   const UploadPage({super.key});
@@ -8,6 +10,26 @@ class UploadPage extends StatefulWidget {
 }
 
 class _UploadPageState extends State<UploadPage> {
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.pickFiles(
+      allowMultiple: false,
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+    if (result == null || result.files.isEmpty) return;
+    final pickedFile = result.files.single;
+    final filePath = pickedFile.path;
+    if (!mounted) return;
+    if (filePath != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PreviewPage(filePath: filePath),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,14 +53,27 @@ class _UploadPageState extends State<UploadPage> {
               height: 200,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.cloud_upload, size: 50, color: Colors.grey),
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.blue[50],
+                      child: IconButton(
+                        onPressed: () {
+                          _pickFile();
+                        },
+                        icon: Icon(
+                          Icons.file_upload_outlined,
+                          size: 50,
+                          color: Colors.blue[300],
+                        ),
+                      ),
+                    ),
                     SizedBox(height: 10),
                     Text(
                       "Tap to upload PDF",
@@ -55,6 +90,41 @@ class _UploadPageState extends State<UploadPage> {
                   ],
                 ),
               ),
+            ),
+            SizedBox(height: 20),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Recent Files",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: 3, // Example recent files count
+                  itemBuilder: (context, index) {
+                    return Card(
+                      child: ListTile(
+                        leading: Icon(Icons.picture_as_pdf, color: Colors.red),
+                        title: Text("Document_${index + 1}.pdf"),
+                        subtitle: Row(
+                          children: [
+                            Icon(Icons.access_time, size: 16),
+                            Text("${index + 1} days ago"),
+                          ],
+                        ),
+                        trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {
+                          // Handle recent file tap (e.g., open or analyze)
+                          print("Tapped on Document_${index + 1}.pdf");
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ],
         ),
