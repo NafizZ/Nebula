@@ -57,6 +57,14 @@ class _UploadPageState extends State<UploadPage> {
     }
   }
 
+  String formatLastOpened(DateTime lastOpened) {
+    final diff = DateTime.now().difference(lastOpened).inDays;
+
+    if (diff == 0) return "Today";
+    if (diff == 1) return "Yesterday";
+    return "$diff days ago";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -122,76 +130,74 @@ class _UploadPageState extends State<UploadPage> {
 
                   const SizedBox(height: 20),
 
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Recent Files",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
+                  const Text(
+                    "Recent Files",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
 
-                      BlocBuilder<PdfCubit, PdfState>(
-                        builder: (context, state) {
-                          if (state.status == PdfStatus.loading) {
-                            return const Padding(
-                              padding: EdgeInsets.all(20),
-                              child: Center(child: CircularProgressIndicator()),
-                            );
-                          }
+                  const SizedBox(height: 10),
 
-                          if (state.pdfs.isEmpty) {
-                            return const Padding(
-                              padding: EdgeInsets.all(30),
-                              child: Center(child: Text("No PDFs yet")),
-                            );
-                          }
+                  BlocBuilder<PdfCubit, PdfState>(
+                    builder: (context, state) {
+                      if (state.status == PdfStatus.loading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                          final pdfs = state.pdfs.reversed.toList();
+                      if (state.pdfs.isEmpty) {
+                        return const Center(child: Text("No PDFs yet"));
+                      }
 
-                          return ListView.builder(
-                            padding: EdgeInsets.zero,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: pdfs.length,
-                            itemBuilder: (context, index) {
-                              final pdf = pdfs[index];
+                      final pdfs = state.pdfs.reversed.toList();
 
-                              return Card(
-                                child: ListTile(
-                                  leading: const Icon(
-                                    Icons.picture_as_pdf,
-                                    color: Colors.red,
+                      return ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: pdfs.length,
+                        itemBuilder: (context, index) {
+                          final pdf = pdfs[index];
+
+                          return Card(
+                            child: ListTile(
+                              leading: const Icon(
+                                Icons.picture_as_pdf,
+                                color: Colors.red,
+                              ),
+                              title: Text(pdf.name),
+
+                              subtitle: Row(
+                                children: [
+                                  const Icon(Icons.access_time, size: 16),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    formatLastOpened(
+                                      pdf.lastOpened ?? DateTime.now(),
+                                    ),
                                   ),
-                                  title: Text(pdf.name),
-                                  subtitle: Text("Last page: ${pdf.lastPage}"),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () {
-                                      context.read<PdfCubit>().removePdf(
-                                        pdf.id!,
-                                      );
-                                    },
+                                ],
+                              ),
+
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  context.read<PdfCubit>().removePdf(pdf.id!);
+                                },
+                              ),
+
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        PreviewPage(filePath: pdf.path),
                                   ),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            PreviewPage(filePath: pdf.path),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           );
                         },
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ],
               ),
