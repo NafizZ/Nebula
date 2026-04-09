@@ -4,4 +4,5 @@ abstract class PdfRepository {
   Future<List<PdfEntity>> getAllPdfs();
   Future<int> insertPdf(PdfEntity pdf);
   Future<void> deletePdf(int id);
+  Future<void> updatePdf(PdfEntity pdf);
 }
