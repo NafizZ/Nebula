@@ -45,4 +45,9 @@ class PdfRepositoryImpl implements PdfRepository {
   Future<void> deletePdf(int id) {
     return local.deletePdf(id);
   }
+
+  @override
+  Future<void> updatePdf(PdfEntity pdf) {
+    return local.updatePdf(_toModel(pdf));
+  }
 }

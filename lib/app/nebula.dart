@@ -7,6 +7,7 @@ import 'package:nebula/features/ai_assistant/domain/usecases/delete_pdf.dart'
     show DeletePdf;
 import 'package:nebula/features/ai_assistant/domain/usecases/get_all_pdfs.dart';
 import 'package:nebula/features/ai_assistant/domain/usecases/insert_pdf.dart';
+import 'package:nebula/features/ai_assistant/domain/usecases/update_pdf.dart';
 import 'package:nebula/features/ai_assistant/presentation/cubit/pdf_cubit.dart';
 import 'package:nebula/features/ai_assistant/presentation/pages/upload_page.dart';
 
@@ -28,6 +29,7 @@ class Nebula extends StatelessWidget {
     final getAllPdfs = GetAllPdfs(repository);
     final insertPdf = InsertPdf(repository);
     final deletePdf = DeletePdf(repository);
+    final updatePdf = UpdatePdf(repository);
 
     return MultiBlocProvider(
       providers: [
@@ -36,6 +38,7 @@ class Nebula extends StatelessWidget {
             getPdfs: getAllPdfs,
             addPdf: insertPdf,
             deletePdf: deletePdf,
+            updatePdf: updatePdf,
           )..loadPdfs(),
         ),
       ],

@@ -35,13 +35,24 @@ class PdfLocalDatasource {
         .toList();
   }
 
-  Future updateLastPage(int id, int page) {
-    return (db.update(db.pdfFiles)..where((tbl) => tbl.id.equals(id))).write(
-      PdfFilesCompanion(lastPage: Value(page)),
+  Future<int> updatePdf(PdfModel pdf) {
+    if (pdf.id == null) {
+      throw Exception("PDF id cannot be null for update");
+    }
+
+    return (db.update(
+      db.pdfFiles,
+    )..where((tbl) => tbl.id.equals(pdf.id!))).write(
+      PdfFilesCompanion(
+        name: Value(pdf.name),
+        path: Value(pdf.path),
+        lastOpened: Value(pdf.lastOpened),
+        lastPage: Value(pdf.lastPage),
+      ),
     );
   }
 
-  Future deletePdf(int id) {
+  Future<void> deletePdf(int id) {
     return (db.delete(db.pdfFiles)..where((tbl) => tbl.id.equals(id))).go();
   }
 }
