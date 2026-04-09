@@ -37,14 +37,14 @@ class PdfCubit extends Cubit<PdfState> {
     }
   }
 
-  /// ➕ Add new PDF
+  //Add new PDF
   Future<void> addNewPdf(PdfEntity pdf) async {
     emit(state.copyWith(status: PdfStatus.loading));
 
     try {
       await addPdf(pdf);
 
-      /// 🔥 Optimistic update (no DB reload)
+      // Optimistic update (no DB reload)
       final updatedList = List<PdfEntity>.from(state.pdfs)..add(pdf);
 
       emit(
@@ -59,7 +59,7 @@ class PdfCubit extends Cubit<PdfState> {
     }
   }
 
-  /// ❌ Delete PDF
+  // Delete PDF
   Future<void> removePdf(int id) async {
     emit(state.copyWith(status: PdfStatus.loading));
 
