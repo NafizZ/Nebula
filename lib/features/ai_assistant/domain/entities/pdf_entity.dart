@@ -6,10 +6,10 @@ class PdfEntity {
   final int lastPage;
 
   PdfEntity({
-    required this.id,
+    this.id,
     required this.name,
     required this.path,
-    required this.lastOpened,
+    this.lastOpened,
     required this.lastPage,
   });
 }
