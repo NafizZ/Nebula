@@ -38,12 +38,18 @@ class PdfCubit extends Cubit<PdfState> {
     }
   }
 
-  /// ➕ Add PDF
-  Future<void> addNewPdf(PdfEntity pdf) async {
+  Future<bool> addNewPdf(PdfEntity pdf) async {
     try {
-      await addPdf(pdf);
+      final alreadyExists = state.pdfs.any((item) => item.path == pdf.path);
 
-      final updated = List<PdfEntity>.from(state.pdfs)..add(pdf);
+      if (alreadyExists) {
+        emit(state.copyWith(status: PdfStatus.duplicate));
+        return false; // ❗ stop save
+      }
+
+      await addPdf(pdf); // DB insert
+
+      final updated = [...state.pdfs, pdf];
 
       emit(
         state.copyWith(
@@ -52,22 +58,24 @@ class PdfCubit extends Cubit<PdfState> {
           errorMessage: null,
         ),
       );
+
+      return true;
     } catch (e) {
       emit(state.copyWith(status: PdfStatus.error, errorMessage: e.toString()));
+      return false;
     }
   }
 
-  /// ❌ Delete PDF
   Future<void> removePdf(int id) async {
     try {
       await deletePdf(id);
 
-      final updated = state.pdfs.where((pdf) => pdf.id != id).toList();
+      final result = await getPdfs();
 
       emit(
         state.copyWith(
           status: PdfStatus.success,
-          pdfs: updated,
+          pdfs: result,
           errorMessage: null,
         ),
       );
@@ -76,7 +84,6 @@ class PdfCubit extends Cubit<PdfState> {
     }
   }
 
-  /// 🔍 Get PDF by path (FIX for your error)
   PdfEntity? getPdfByPath(String path) {
     try {
       return state.pdfs.firstWhere((pdf) => pdf.path == path);
@@ -85,7 +92,6 @@ class PdfCubit extends Cubit<PdfState> {
     }
   }
 
-  /// 📄 Update last page (async with DB persistence)
   Future<void> updateLastPage(int id, int page) async {
     try {
       final pdfToUpdate = state.pdfs.firstWhere((pdf) => pdf.id == id);
@@ -105,7 +111,6 @@ class PdfCubit extends Cubit<PdfState> {
 
       emit(state.copyWith(pdfs: updated));
     } catch (e) {
-      // Handle error silently or emit error state
       print('Error updating last page: $e');
     }
   }

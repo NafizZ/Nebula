@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:nebula/features/ai_assistant/domain/entities/pdf_entity.dart';
 
-enum PdfStatus { initial, loading, success, error }
+enum PdfStatus { initial, loading, success, error, duplicate }
 
 class PdfState extends Equatable {
   final PdfStatus status;
@@ -22,7 +22,7 @@ class PdfState extends Equatable {
     return PdfState(
       status: status ?? this.status,
       pdfs: pdfs ?? this.pdfs,
-      errorMessage: errorMessage,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
