@@ -30,27 +30,30 @@ class _UploadPageState extends State<UploadPage> {
       return;
     }
 
-    final pickedFile = result.files.single;
-    final filePath = pickedFile.path;
+    final file = result.files.single;
+    final path = file.path;
 
-    if (!mounted || filePath == null) {
+    if (path == null || !mounted) {
       setState(() => _isLoading = false);
       return;
     }
 
     final pdf = PdfEntity(
-      name: pickedFile.name,
-      path: filePath,
+      name: file.name,
+      path: path,
       lastPage: 0,
       lastOpened: DateTime.now(),
     );
 
-    context.read<PdfCubit>().addNewPdf(pdf);
+    final cubit = context.read<PdfCubit>();
+    final success = await cubit.addNewPdf(pdf);
 
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => PreviewPage(filePath: filePath)),
-    );
+    if (success && mounted) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => PreviewPage(filePath: path)),
+      );
+    }
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -179,8 +182,10 @@ class _UploadPageState extends State<UploadPage> {
 
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  context.read<PdfCubit>().removePdf(pdf.id!);
+                                onPressed: () async {
+                                  await context.read<PdfCubit>().removePdf(
+                                    pdf.id!,
+                                  );
                                 },
                               ),
 

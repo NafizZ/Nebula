@@ -55,7 +55,19 @@ class _PreviewPageState extends State<PreviewPage> {
     final currentLastPage = pdf?.lastPage ?? 1;
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.filePath.split('/').last)),
+      appBar: AppBar(
+        title: Text(widget.filePath.split('/').last),
+        actions: [
+          CircleAvatar(
+            backgroundColor: Colors.blueAccent,
+            child: IconButton(
+              icon: Icon(Icons.auto_awesome, color: Colors.white),
+              onPressed: () {},
+            ),
+          ),
+          SizedBox(width: 12),
+        ],
+      ),
 
       body: SfPdfViewerTheme(
         data: const SfPdfViewerThemeData(backgroundColor: Colors.white),
