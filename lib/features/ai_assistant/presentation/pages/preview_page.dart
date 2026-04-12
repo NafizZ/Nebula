@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nebula/features/ai_assistant/presentation/cubit/pdf_cubit.dart';
+import 'package:nebula/features/ai_assistant/presentation/pages/analyze_pdf.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
@@ -62,7 +63,12 @@ class _PreviewPageState extends State<PreviewPage> {
             backgroundColor: Colors.blueAccent,
             child: IconButton(
               icon: Icon(Icons.auto_awesome, color: Colors.white),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AnalyzePdf()),
+                );
+              },
             ),
           ),
           SizedBox(width: 12),

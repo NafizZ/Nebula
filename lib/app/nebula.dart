@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nebula/core/services/nano_ai_service.dart';
+import 'package:nebula/core/services/pdf_parser.dart';
 import 'package:nebula/features/ai_assistant/data/datasources/pdf_local_datasource.dart';
 import 'package:nebula/features/ai_assistant/data/db/app_database.dart';
 import 'package:nebula/features/ai_assistant/data/repositories/pdf_repository_impl.dart';
@@ -30,6 +33,12 @@ class Nebula extends StatelessWidget {
     final insertPdf = InsertPdf(repository);
     final deletePdf = DeletePdf(repository);
     final updatePdf = UpdatePdf(repository);
+    final pdfParser = PdfParser();
+
+    final aiService = NanoAiService(
+      nanoAvailable: true, // later real check
+      channel: const MethodChannel('nebula_nano_ai'),
+    );
 
     return MultiBlocProvider(
       providers: [
@@ -39,6 +48,8 @@ class Nebula extends StatelessWidget {
             addPdf: insertPdf,
             deletePdf: deletePdf,
             updatePdf: updatePdf,
+            pdfParser: pdfParser,
+            aiService: aiService,
           )..loadPdfs(),
         ),
       ],

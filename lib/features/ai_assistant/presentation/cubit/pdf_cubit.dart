@@ -114,4 +114,25 @@ class PdfCubit extends Cubit<PdfState> {
       print('Error updating last page: $e');
     }
   }
+
+  Future<void> analyzePdf(String path) async {
+    emit(state.copyWith(status: PdfStatus.loading));
+
+    try {
+      final text = await PdfParser().extractText(path);
+
+      final result = await aiService.analyze(text);
+
+      emit(
+        state.copyWith(
+          status: PdfStatus.success,
+          summary: result['summary'],
+          dates: List<String>.from(result['dates']),
+          actions: List<String>.from(result['actions']),
+        ),
+      );
+    } catch (e) {
+      emit(state.copyWith(status: PdfStatus.error, errorMessage: e.toString()));
+    }
+  }
 }

@@ -39,6 +39,8 @@ dependencies:
   path: ^1.9.1
   flutter_bloc: ^9.1.1
   equatable: ^2.0.5
+  pdfx: ^2.9.2
+  syncfusion_flutter_pdf: ^33.1.47
 
 
 dev_dependencies:
