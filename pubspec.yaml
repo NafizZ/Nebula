@@ -41,6 +41,8 @@ dependencies:
   equatable: ^2.0.5
   pdfx: ^2.9.2
   syncfusion_flutter_pdf: ^33.1.47
+  google_generative_ai: ^0.4.6
+  gemini_nano_android: ^1.1.2
 
 
 dev_dependencies:

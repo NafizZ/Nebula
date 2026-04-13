@@ -66,7 +66,9 @@ class _PreviewPageState extends State<PreviewPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AnalyzePdf()),
+                  MaterialPageRoute(
+                    builder: (_) => AnalyzePdf(filePath: widget.filePath),
+                  ),
                 );
               },
             ),

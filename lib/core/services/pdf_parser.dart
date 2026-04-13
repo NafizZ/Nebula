@@ -12,6 +12,9 @@ class PdfParser {
     String text = extractor.extractText();
     document.dispose();
 
+    // 🔥 CLEAN TEXT (IMPORTANT)
+    text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+
     return text;
   }
 }

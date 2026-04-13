@@ -1,9 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nebula/core/services/local_analyzer.dart';
+
+import 'package:nebula/core/services/pdf_parser.dart';
+import 'package:nebula/core/services/nano_ai_service.dart';
+
 import '../../domain/entities/pdf_entity.dart';
 import '../../domain/usecases/get_all_pdfs.dart';
 import '../../domain/usecases/insert_pdf.dart';
 import '../../domain/usecases/delete_pdf.dart';
 import '../../domain/usecases/update_pdf.dart';
+
 import 'pdf_state.dart';
 
 class PdfCubit extends Cubit<PdfState> {
@@ -12,14 +18,19 @@ class PdfCubit extends Cubit<PdfState> {
   final DeletePdf deletePdf;
   final UpdatePdf updatePdf;
 
+  final PdfParser pdfParser;
+  final NanoAiService aiService;
+
   PdfCubit({
     required this.getPdfs,
     required this.addPdf,
     required this.deletePdf,
     required this.updatePdf,
+    required this.pdfParser,
+    required this.aiService,
   }) : super(const PdfState());
 
-  /// 🔄 Load all PDFs
+  // 📥 LOAD PDFs
   Future<void> loadPdfs() async {
     emit(state.copyWith(status: PdfStatus.loading));
 
@@ -38,24 +49,30 @@ class PdfCubit extends Cubit<PdfState> {
     }
   }
 
+  // ➕ ADD PDF (with duplicate check)
   Future<bool> addNewPdf(PdfEntity pdf) async {
     try {
-      final alreadyExists = state.pdfs.any((item) => item.path == pdf.path);
+      final exists = state.pdfs.any((p) => p.path == pdf.path);
 
-      if (alreadyExists) {
+      if (exists) {
         emit(state.copyWith(status: PdfStatus.duplicate));
-        return false; // ❗ stop save
+        return false;
       }
 
-      await addPdf(pdf); // DB insert
+      final id = await addPdf(pdf);
 
-      final updated = [...state.pdfs, pdf];
+      final newPdf = PdfEntity(
+        id: id,
+        name: pdf.name,
+        path: pdf.path,
+        lastOpened: pdf.lastOpened,
+        lastPage: pdf.lastPage,
+      );
 
       emit(
         state.copyWith(
           status: PdfStatus.success,
-          pdfs: updated,
-          errorMessage: null,
+          pdfs: [...state.pdfs, newPdf],
         ),
       );
 
@@ -66,52 +83,41 @@ class PdfCubit extends Cubit<PdfState> {
     }
   }
 
+  // ❌ DELETE PDF (fast UI update)
   Future<void> removePdf(int id) async {
     try {
       await deletePdf(id);
 
-      final result = await getPdfs();
+      final updated = state.pdfs.where((p) => p.id != id).toList();
 
-      emit(
-        state.copyWith(
-          status: PdfStatus.success,
-          pdfs: result,
-          errorMessage: null,
-        ),
-      );
+      emit(state.copyWith(status: PdfStatus.success, pdfs: updated));
     } catch (e) {
       emit(state.copyWith(status: PdfStatus.error, errorMessage: e.toString()));
     }
   }
 
-  PdfEntity? getPdfByPath(String path) {
-    try {
-      return state.pdfs.firstWhere((pdf) => pdf.path == path);
-    } catch (_) {
-      return null;
-    }
-  }
-
+  // 📄 UPDATE LAST PAGE
   Future<void> updateLastPage(int id, int page) async {
     try {
-      final pdfToUpdate = state.pdfs.firstWhere((pdf) => pdf.id == id);
+      final pdf = state.pdfs.firstWhere((p) => p.id == id);
+
       final updatedPdf = PdfEntity(
-        id: pdfToUpdate.id,
-        name: pdfToUpdate.name,
-        path: pdfToUpdate.path,
-        lastOpened: pdfToUpdate.lastOpened,
+        id: pdf.id,
+        name: pdf.name,
+        path: pdf.path,
+        lastOpened: pdf.lastOpened,
         lastPage: page,
       );
 
       await updatePdf(updatedPdf);
 
-      final updated = state.pdfs
-          .map((pdf) => pdf.id == id ? updatedPdf : pdf)
-          .toList();
+      final updatedList = state.pdfs.map((p) {
+        return p.id == id ? updatedPdf : p;
+      }).toList();
 
-      emit(state.copyWith(pdfs: updated));
+      emit(state.copyWith(pdfs: updatedList));
     } catch (e) {
-      print('Error updating last page: $e');
+      emit(state.copyWith(status: PdfStatus.error, errorMessage: e.toString()));
     }
   }
 
@@ -119,9 +125,32 @@ class PdfCubit extends Cubit<PdfState> {
     emit(state.copyWith(status: PdfStatus.loading));
 
     try {
-      final text = await PdfParser().extractText(path);
+      final text = await pdfParser.extractText(path);
 
-      final result = await aiService.analyze(text);
+      if (text.trim().isEmpty) {
+        emit(
+          state.copyWith(
+            status: PdfStatus.error,
+            errorMessage: "No text found",
+          ),
+        );
+        return;
+      }
+
+      Map<String, dynamic> result;
+
+      final isAvailable = await aiService.isAvailable();
+
+      if (isAvailable) {
+        try {
+          result = await aiService.analyze(text);
+        } catch (e) {
+          // fallback if AI fails
+          result = LocalAnalyzer().analyze(text);
+        }
+      } else {
+        result = LocalAnalyzer().analyze(text);
+      }
 
       emit(
         state.copyWith(
@@ -133,6 +162,15 @@ class PdfCubit extends Cubit<PdfState> {
       );
     } catch (e) {
       emit(state.copyWith(status: PdfStatus.error, errorMessage: e.toString()));
+    }
+  }
+
+  // 🔍 GET BY PATH
+  PdfEntity? getPdfByPath(String path) {
+    try {
+      return state.pdfs.firstWhere((p) => p.path == path);
+    } catch (_) {
+      return null;
     }
   }
 }
