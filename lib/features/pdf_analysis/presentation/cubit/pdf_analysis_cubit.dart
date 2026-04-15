@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nebula/features/pdf_analysis/domain/usecases/analyze_pdf.dart';
-import 'package:nebula/features/pdf_analysis/presentation/cubit/pdf_analysis_state.dart';
+import 'pdf_analysis_state.dart';
 
 class PdfAnalysisCubit extends Cubit<PdfAnalysisState> {
   final AnalyzePdf analyzePdfUseCase;
@@ -13,6 +13,7 @@ class PdfAnalysisCubit extends Cubit<PdfAnalysisState> {
 
     try {
       final result = await analyzePdfUseCase(path);
+
       emit(PdfAnalysisState(status: PdfAnalysisStatus.success, result: result));
     } catch (e) {
       emit(

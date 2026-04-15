@@ -25,6 +25,8 @@ class _UploadPageState extends State<UploadPage> {
       allowedExtensions: ['pdf'],
     );
 
+    if (!mounted) return;
+
     if (result == null || result.files.isEmpty) {
       setState(() => _isLoading = false);
       return;
@@ -33,7 +35,7 @@ class _UploadPageState extends State<UploadPage> {
     final file = result.files.single;
     final path = file.path;
 
-    if (path == null || !mounted) {
+    if (path == null) {
       setState(() => _isLoading = false);
       return;
     }
@@ -48,7 +50,9 @@ class _UploadPageState extends State<UploadPage> {
     final cubit = context.read<PdfCubit>();
     final success = await cubit.addNewPdf(pdf);
 
-    if (success && mounted) {
+    if (!mounted) return;
+
+    if (success) {
       await Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => PreviewPage(filePath: path)),

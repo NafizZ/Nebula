@@ -1,5 +1,5 @@
 import 'package:nebula/features/pdf_analysis/data/datasources/local_analyzer.dart';
-import 'package:nebula/features/pdf_analysis/data/datasources/nano_ai_service.dart';
+import 'package:nebula/features/pdf_analysis/data/datasources/gemeni_api_service.dart';
 import 'package:nebula/features/pdf_analysis/data/datasources/pdf_parser.dart';
 import 'package:nebula/features/pdf_analysis/data/models/analysis_result_model.dart';
 import 'package:nebula/features/pdf_analysis/domain/entities/analysis_result_entity.dart';
@@ -7,7 +7,7 @@ import 'package:nebula/features/pdf_analysis/domain/repositories/analysis_reposi
 
 class AnalysisRepositoryImpl implements AnalysisRepository {
   final PdfParser pdfParser;
-  final NanoAiService aiService;
+  final GeminiApiService aiService;
   final LocalAnalyzer localAnalyzer;
 
   AnalysisRepositoryImpl({
@@ -21,19 +21,14 @@ class AnalysisRepositoryImpl implements AnalysisRepository {
     final text = await pdfParser.extractText(path);
 
     if (text.trim().isEmpty) {
-      throw Exception('No text found');
+      throw Exception('No text found in PDF');
     }
 
     Map<String, dynamic> result;
-    final isAvailable = await aiService.isAvailable();
 
-    if (isAvailable) {
-      try {
-        result = await aiService.analyze(text);
-      } catch (_) {
-        result = localAnalyzer.analyze(text);
-      }
-    } else {
+    try {
+      result = await aiService.analyze(text);
+    } catch (_) {
       result = localAnalyzer.analyze(text);
     }
 

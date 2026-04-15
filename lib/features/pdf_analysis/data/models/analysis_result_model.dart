@@ -9,9 +9,9 @@ class AnalysisResultModel extends AnalysisResultEntity {
 
   factory AnalysisResultModel.fromMap(Map<String, dynamic> map) {
     return AnalysisResultModel(
-      summary: map['summary'] as String? ?? 'No summary found',
-      dates: List<String>.from(map['dates'] as List? ?? const []),
-      actions: List<String>.from(map['actions'] as List? ?? const []),
+      summary: map['summary'] ?? '',
+      dates: List<String>.from(map['dates'] ?? []),
+      actions: List<String>.from(map['actions'] ?? []),
     );
   }
 }

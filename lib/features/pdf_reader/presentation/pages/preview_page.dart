@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -19,29 +20,36 @@ class PreviewPage extends StatefulWidget {
 
 class _PreviewPageState extends State<PreviewPage> {
   late PdfViewerController _controller;
+  late PdfReaderCubit _cubit;
+
+  Timer? _debounce;
+
+  bool _initialized = false;
+  int _initialPage = 1;
 
   @override
   void initState() {
     super.initState();
+
     _controller = PdfViewerController();
-    context.read<PdfReaderCubit>().loadLastPage(widget.filePath);
-  }
+    _cubit = context.read<PdfReaderCubit>();
 
-  @override
-  void didUpdateWidget(PreviewPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.filePath != widget.filePath) {
-      _controller.dispose();
-      _controller = PdfViewerController();
-      context.read<PdfReaderCubit>().loadLastPage(widget.filePath);
-    }
+    _cubit.loadLastPage(widget.filePath);
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  void _onPageChanged(PdfPageChangedDetails details) {
+    _debounce?.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      _cubit.saveLastPage(widget.filePath, details.newPageNumber);
+    });
   }
 
   @override
@@ -74,20 +82,24 @@ class _PreviewPageState extends State<PreviewPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final currentLastPage = state.filePath == widget.filePath
-              ? state.lastPage
-              : 1;
+          // ✅ Set initial page ONLY ONCE
+          if (!_initialized && state.filePath == widget.filePath) {
+            _initialPage = state.lastPage;
+            _initialized = true;
 
-          return PdfViewerWidget(
-            filePath: widget.filePath,
-            controller: _controller,
-            initialPageNumber: currentLastPage,
-            onPageChanged: (details) {
-              context.read<PdfReaderCubit>().saveLastPage(
-                widget.filePath,
-                details.newPageNumber,
-              );
-            },
+            // jump once after build
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _controller.jumpToPage(_initialPage);
+            });
+          }
+
+          return RepaintBoundary(
+            child: PdfViewerWidget(
+              filePath: widget.filePath,
+              controller: _controller,
+              initialPageNumber: _initialPage,
+              onPageChanged: _onPageChanged,
+            ),
           );
         },
       ),

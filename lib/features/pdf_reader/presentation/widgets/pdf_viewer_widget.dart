@@ -24,7 +24,6 @@ class PdfViewerWidget extends StatelessWidget {
       data: const SfPdfViewerThemeData(backgroundColor: Colors.white),
       child: SfPdfViewer.file(
         File(filePath),
-        key: ValueKey('$filePath-$initialPageNumber'),
         controller: controller,
         initialPageNumber: initialPageNumber,
         onPageChanged: onPageChanged,

@@ -14,18 +14,6 @@ class PdfAnalysisState extends Equatable {
     this.errorMessage,
   });
 
-  PdfAnalysisState copyWith({
-    PdfAnalysisStatus? status,
-    AnalysisResultEntity? result,
-    String? errorMessage,
-  }) {
-    return PdfAnalysisState(
-      status: status ?? this.status,
-      result: result ?? this.result,
-      errorMessage: errorMessage ?? this.errorMessage,
-    );
-  }
-
   @override
   List<Object?> get props => [status, result, errorMessage];
 }

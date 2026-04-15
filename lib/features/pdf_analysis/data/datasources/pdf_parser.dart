@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class PdfParser {
@@ -10,7 +9,7 @@ class PdfParser {
     final document = PdfDocument(inputBytes: bytes);
     final extractor = PdfTextExtractor(document);
 
-    var text = extractor.extractText();
+    String text = extractor.extractText();
     document.dispose();
 
     text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
