@@ -28,7 +28,7 @@ class LocalAnalyzer {
           {
             "layout": "card",
             "children": [
-              {"layout": "text", "value": "Local Analysis Result"},
+              {"layout": "text", "value": "⚠️ AI failed. Please try again."},
             ],
           },
         ],

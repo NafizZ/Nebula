@@ -20,6 +20,7 @@ class _AnalyzePdfState extends State<AnalyzePdf> {
   void initState() {
     super.initState();
 
+    /// 🔥 start fresh
     Future.microtask(() {
       context.read<PdfResultCubit>().clear();
       context.read<PdfAnalysisCubit>().analyzePdf(widget.filePath);
@@ -30,16 +31,22 @@ class _AnalyzePdfState extends State<AnalyzePdf> {
   Widget build(BuildContext context) {
     return BlocListener<PdfAnalysisCubit, PdfAnalysisState>(
       listener: (context, state) {
+        /// ❌ ERROR
         if (state.status == PdfAnalysisStatus.error) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.errorMessage ?? "Error")),
           );
           Navigator.pop(context);
         }
+
+        /// ✅ SUCCESS (NO DELAY, NO MICROTASK)
         if (state.status == PdfAnalysisStatus.success && state.result != null) {
           final result = state.result!;
+
+          /// save result
           context.read<PdfResultCubit>().setResult(result);
 
+          /// navigate
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const ResultPage()),

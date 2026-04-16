@@ -19,18 +19,6 @@ class AnalysisResultEntity extends Equatable {
     this.uiTree,
   });
 
-  factory AnalysisResultEntity.fromMap(Map<String, dynamic> map) {
-    return AnalysisResultEntity(
-      summary: map['summary'] ?? '',
-      dates: List<String>.from(map['dates'] ?? []),
-      actions: List<String>.from(map['actions'] ?? []),
-      keyPoints: List<String>.from(map['keyPoints'] ?? []),
-      riskLevel: map['riskLevel'] ?? "Low",
-      importance: map['importance'] ?? 0,
-      uiTree: map['uiTree'],
-    );
-  }
-
   @override
   List<Object?> get props => [
     summary,

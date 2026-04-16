@@ -6,35 +6,44 @@ class GenUiRenderer {
   static Widget build(Map<String, dynamic> node, {int depth = 0}) {
     if (node.isEmpty || depth > 25) return const SizedBox();
 
-    final layout = node['layout'];
+    /// 🔥 support multiple schema
+    final layout = node['layout'] ?? node['type'] ?? '';
 
     switch (layout) {
+      /// ---------------- COLUMN ----------------
       case 'column':
+        final children = _children(node, depth);
+
+        if (children.isEmpty) {
+          final value = _value(node);
+          return value.isEmpty
+              ? const SizedBox()
+              : Text(value, style: const TextStyle(fontSize: 14));
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: _children(node, depth),
+          children: children,
         );
 
+      /// ---------------- ROW (FIXED → WRAP) ----------------
       case 'row':
         final children = _children(node, depth);
 
-        final forceWrap = node['wrap'] == true;
-        final smartWrap = children.length > 3;
+        if (children.isEmpty) return const SizedBox();
 
-        if (forceWrap || smartWrap) {
-          return Wrap(spacing: DS.sm, runSpacing: DS.sm, children: children);
-        }
+        return Wrap(spacing: DS.sm, runSpacing: DS.sm, children: children);
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(children: children),
-        );
-
+      /// ---------------- TEXT ----------------
       case 'text':
+        final value = _value(node);
+
+        if (value.trim().isEmpty) return const SizedBox();
+
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: DS.xs),
           child: Text(
-            node['value'] ?? '',
+            value,
             style: TextStyle(
               fontSize: (node['size'] ?? 14).toDouble(),
               fontWeight: node['bold'] == true
@@ -45,15 +54,29 @@ class GenUiRenderer {
           ),
         );
 
+      /// ---------------- CARD ----------------
       case 'card':
+        final children = _children(node, depth);
+        final value = _value(node);
+
         return DSCard(
-          child: GenUiRenderer.build({
-            "layout": "column",
-            "children": node['children'] ?? [],
-          }, depth: depth + 1),
+          child: children.isEmpty
+              ? Text(
+                  value.isEmpty ? "No data" : value,
+                  style: const TextStyle(fontSize: 14),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: children,
+                ),
         );
 
+      /// ---------------- BADGE ----------------
       case 'badge':
+        final value = _value(node);
+
+        if (value.isEmpty) return const SizedBox();
+
         return AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.symmetric(
@@ -66,7 +89,7 @@ class GenUiRenderer {
             border: Border.all(color: DS.primary.withOpacity(0.2)),
           ),
           child: Text(
-            node['value'] ?? '',
+            value,
             style: const TextStyle(
               fontSize: 12,
               color: DS.primary,
@@ -77,16 +100,43 @@ class GenUiRenderer {
 
       /// ---------------- SPACER ----------------
       case 'spacer':
-        return const SizedBox(height: DS.md);
+        final isHorizontal = node['horizontal'] == true;
 
+        return isHorizontal
+            ? const SizedBox(width: DS.md)
+            : const SizedBox(height: DS.md);
+
+      /// ---------------- DEFAULT ----------------
       default:
-        return const SizedBox();
+        final value = _value(node);
+        return value.isNotEmpty
+            ? Text(value, style: const TextStyle(fontSize: 14))
+            : const SizedBox();
     }
   }
 
+  /// 🔥 SAFE CHILD PARSER + AUTO FIX
   static List<Widget> _children(Map<String, dynamic> node, int depth) {
-    return (node['children'] as List? ?? [])
-        .map((e) => build(e, depth: depth + 1))
-        .toList();
+    final raw = node['children'];
+
+    if (raw == null || raw is! List || raw.isEmpty) return [];
+
+    return raw.map((e) {
+      if (e is Map<String, dynamic>) {
+        /// 🔥 AUTO FIX: row + spacer → horizontal spacer
+        if ((node['layout'] == 'row' || node['type'] == 'row') &&
+            e['layout'] == 'spacer') {
+          e['horizontal'] = true;
+        }
+
+        return build(e, depth: depth + 1);
+      }
+      return const SizedBox();
+    }).toList();
+  }
+
+  /// 🔥 UNIVERSAL VALUE EXTRACTOR
+  static String _value(Map<String, dynamic> node) {
+    return (node['value'] ?? node['text'] ?? node['content'] ?? '').toString();
   }
 }
