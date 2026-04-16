@@ -6,11 +6,9 @@ class GenUiRenderer {
   static Widget build(Map<String, dynamic> node, {int depth = 0}) {
     if (node.isEmpty || depth > 25) return const SizedBox();
 
-    /// 🔥 support multiple schema
     final layout = node['layout'] ?? node['type'] ?? '';
 
     switch (layout) {
-      /// ---------------- COLUMN ----------------
       case 'column':
         final children = _children(node, depth);
 
@@ -26,7 +24,6 @@ class GenUiRenderer {
           children: children,
         );
 
-      /// ---------------- ROW (FIXED → WRAP) ----------------
       case 'row':
         final children = _children(node, depth);
 
@@ -34,7 +31,6 @@ class GenUiRenderer {
 
         return Wrap(spacing: DS.sm, runSpacing: DS.sm, children: children);
 
-      /// ---------------- TEXT ----------------
       case 'text':
         final value = _value(node);
 
@@ -53,8 +49,6 @@ class GenUiRenderer {
             ),
           ),
         );
-
-      /// ---------------- CARD ----------------
       case 'card':
         final children = _children(node, depth);
         final value = _value(node);
@@ -71,7 +65,6 @@ class GenUiRenderer {
                 ),
         );
 
-      /// ---------------- BADGE ----------------
       case 'badge':
         final value = _value(node);
 
@@ -98,7 +91,6 @@ class GenUiRenderer {
           ),
         );
 
-      /// ---------------- SPACER ----------------
       case 'spacer':
         final isHorizontal = node['horizontal'] == true;
 
@@ -106,7 +98,6 @@ class GenUiRenderer {
             ? const SizedBox(width: DS.md)
             : const SizedBox(height: DS.md);
 
-      /// ---------------- DEFAULT ----------------
       default:
         final value = _value(node);
         return value.isNotEmpty
@@ -115,7 +106,6 @@ class GenUiRenderer {
     }
   }
 
-  /// 🔥 SAFE CHILD PARSER + AUTO FIX
   static List<Widget> _children(Map<String, dynamic> node, int depth) {
     final raw = node['children'];
 
@@ -123,7 +113,6 @@ class GenUiRenderer {
 
     return raw.map((e) {
       if (e is Map<String, dynamic>) {
-        /// 🔥 AUTO FIX: row + spacer → horizontal spacer
         if ((node['layout'] == 'row' || node['type'] == 'row') &&
             e['layout'] == 'spacer') {
           e['horizontal'] = true;
@@ -135,7 +124,6 @@ class GenUiRenderer {
     }).toList();
   }
 
-  /// 🔥 UNIVERSAL VALUE EXTRACTOR
   static String _value(Map<String, dynamic> node) {
     return (node['value'] ?? node['text'] ?? node['content'] ?? '').toString();
   }
