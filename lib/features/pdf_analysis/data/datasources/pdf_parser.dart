@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class PdfParser {
@@ -6,14 +8,18 @@ class PdfParser {
     final file = File(path);
     final bytes = await file.readAsBytes();
 
-    final document = PdfDocument(inputBytes: bytes);
+    return compute(_extractTextInIsolate, bytes);
+  }
+}
+
+String _extractTextInIsolate(Uint8List bytes) {
+  final document = PdfDocument(inputBytes: bytes);
+
+  try {
     final extractor = PdfTextExtractor(document);
-
-    String text = extractor.extractText();
+    final text = extractor.extractText();
+    return text.replaceAll(RegExp(r'\s+'), ' ').trim();
+  } finally {
     document.dispose();
-
-    text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
-
-    return text;
   }
 }
