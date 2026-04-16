@@ -45,6 +45,9 @@ dependencies:
   gemini_nano_android: ^1.1.2
   flutter_gemini: ^3.0.0
   flutter_dotenv: ^6.0.0
+  firebase_core: ^4.7.0
+  firebase_vertexai: ^2.2.0
+
 
 
 dev_dependencies:
