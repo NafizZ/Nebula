@@ -6,12 +6,7 @@ class PdfResultCubit extends Cubit<PdfResultState> {
   PdfResultCubit() : super(const PdfResultState());
 
   void setResult(AnalysisResultEntity result) {
-    emit(
-      PdfResultState(
-        status: PdfResultStatus.ready,
-        result: result,
-      ),
-    );
+    emit(PdfResultState(status: PdfResultStatus.ready, result: result));
   }
 
   void clear() {

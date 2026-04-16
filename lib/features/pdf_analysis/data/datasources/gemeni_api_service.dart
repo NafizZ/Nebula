@@ -5,69 +5,33 @@ class GeminiApiService {
   final gemini = Gemini.instance;
 
   Future<Map<String, dynamic>> analyze(String text) async {
-    try {
-      final response = await gemini.text('''
-Return ONLY valid JSON:
+    final response = await gemini.text('''
+Return ONLY valid JSON.
 
+Rules:
+- Must return object with "uiTree" key
+- uiTree must be a valid UI tree
+- Allowed layouts: column, row, text, card, badge, spacer
+
+Example:
 {
-  "summary": "",
-  "dates": [],
-  "actions": [],
-  "keyPoints": [],
-  "riskLevel": "Low",
-  "importance": 0,
-  "components": [
-    {
-      "type": "summary",
-      "content": ""
-    },
-    {
-      "type": "insights",
-      "riskLevel": "Low",
-      "importance": 0
-    },
-    {
-      "type": "keyPoints",
-      "items": []
-    },
-    {
-      "type": "timeline",
-      "items": []
-    },
-    {
-      "type": "actions",
-      "items": []
-    }
-  ]
+  "summary": "text",
+  "uiTree": {
+    "layout": "column",
+    "children": []
+  }
 }
 
 TEXT:
 $text
 ''');
 
-      final output = response?.output ?? '';
+    final output = response?.output ?? '';
 
-      final jsonStart = output.indexOf('{');
-      final jsonEnd = output.lastIndexOf('}');
+    final start = output.indexOf('{');
+    final end = output.lastIndexOf('}');
 
-      if (jsonStart == -1 || jsonEnd == -1) {
-        throw Exception("Invalid response format");
-      }
-
-      final jsonString = output.substring(jsonStart, jsonEnd + 1);
-      final data = jsonDecode(jsonString);
-
-      return data;
-    } catch (e) {
-      return {
-        "summary": "Error: $e",
-        "dates": [],
-        "actions": [],
-        "keyPoints": [],
-        "riskLevel": "Low",
-        "importance": 0,
-        "components": [],
-      };
-    }
+    final jsonString = output.substring(start, end + 1);
+    return jsonDecode(jsonString);
   }
 }

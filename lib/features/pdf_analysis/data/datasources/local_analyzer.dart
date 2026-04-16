@@ -22,7 +22,17 @@ class LocalAnalyzer {
       "keyPoints": [],
       "riskLevel": "Low",
       "importance": 10,
-      "components": [],
+      "uiTree": {
+        "layout": "column",
+        "children": [
+          {
+            "layout": "card",
+            "children": [
+              {"layout": "text", "value": "Local Analysis Result"},
+            ],
+          },
+        ],
+      },
     };
   }
 }

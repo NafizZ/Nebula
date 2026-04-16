@@ -7,7 +7,7 @@ class AnalysisResultEntity extends Equatable {
   final List<String> keyPoints;
   final String riskLevel;
   final int importance;
-  final List<Map<String, dynamic>> components;
+  final Map<String, dynamic>? uiTree;
 
   const AnalysisResultEntity({
     required this.summary,
@@ -16,7 +16,7 @@ class AnalysisResultEntity extends Equatable {
     this.keyPoints = const [],
     this.riskLevel = "Low",
     this.importance = 0,
-    this.components = const [],
+    this.uiTree,
   });
 
   factory AnalysisResultEntity.fromMap(Map<String, dynamic> map) {
@@ -27,7 +27,7 @@ class AnalysisResultEntity extends Equatable {
       keyPoints: List<String>.from(map['keyPoints'] ?? []),
       riskLevel: map['riskLevel'] ?? "Low",
       importance: map['importance'] ?? 0,
-      components: List<Map<String, dynamic>>.from(map['components'] ?? []),
+      uiTree: map['uiTree'],
     );
   }
 
@@ -39,6 +39,6 @@ class AnalysisResultEntity extends Equatable {
     keyPoints,
     riskLevel,
     importance,
-    components,
+    uiTree,
   ];
 }
