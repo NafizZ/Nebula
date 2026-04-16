@@ -3,21 +3,26 @@ class LocalAnalyzer {
     final dateRegex = RegExp(r'\d{4}-\d{2}-\d{2}');
     final dates = dateRegex.allMatches(text).map((e) => e.group(0)!).toList();
 
-    final normalized = text.toLowerCase();
+    final lower = text.toLowerCase();
+
     final actions = <String>[];
 
-    if (normalized.contains('meeting')) {
+    if (lower.contains('meeting')) {
       actions.add('Schedule meeting reminder');
     }
 
-    if (normalized.contains('pay') || normalized.contains('due')) {
+    if (lower.contains('pay') || lower.contains('due')) {
       actions.add('Payment reminder needed');
     }
 
     return {
-      'summary': text.split(' ').take(30).join(' '),
-      'dates': dates,
-      'actions': actions,
+      "summary": text.split(' ').take(30).join(' '),
+      "dates": dates,
+      "actions": actions,
+      "keyPoints": [],
+      "riskLevel": "Low",
+      "importance": 10,
+      "components": [],
     };
   }
 }

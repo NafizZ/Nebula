@@ -5,15 +5,11 @@ import 'package:nebula/features/pdf_results/presentation/cubit/pdf_result_state.
 import 'package:nebula/features/pdf_results/presentation/widgets/action_list.dart';
 import 'package:nebula/features/pdf_results/presentation/widgets/date_list.dart';
 import 'package:nebula/features/pdf_results/presentation/widgets/summary_card.dart';
+import 'gen_ui_builder.dart';
 
-class ResultPage extends StatefulWidget {
+class ResultPage extends StatelessWidget {
   const ResultPage({super.key});
 
-  @override
-  State<ResultPage> createState() => _ResultPageState();
-}
-
-class _ResultPageState extends State<ResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,18 +22,31 @@ class _ResultPageState extends State<ResultPage> {
             return const Center(child: Text('No analysis result available'));
           }
 
+          final components = result.components;
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SummaryCard(summary: result.summary),
-                const SizedBox(height: 16),
-                DateList(dates: result.dates),
-                const SizedBox(height: 16),
-                ActionList(actions: result.actions),
-              ],
-            ),
+            child: components.isNotEmpty
+                ? Column(
+                    children: components
+                        .map(
+                          (c) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: GenUiBuilder.build(c),
+                          ),
+                        )
+                        .toList(),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SummaryCard(summary: result.summary),
+                      const SizedBox(height: 16),
+                      DateList(dates: result.dates),
+                      const SizedBox(height: 16),
+                      ActionList(actions: result.actions),
+                    ],
+                  ),
           );
         },
       ),

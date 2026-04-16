@@ -5,6 +5,10 @@ class AnalysisResultModel extends AnalysisResultEntity {
     required super.summary,
     super.dates,
     super.actions,
+    super.keyPoints,
+    super.riskLevel,
+    super.importance,
+    super.components,
   });
 
   factory AnalysisResultModel.fromMap(Map<String, dynamic> map) {
@@ -12,6 +16,12 @@ class AnalysisResultModel extends AnalysisResultEntity {
       summary: map['summary'] ?? '',
       dates: List<String>.from(map['dates'] ?? []),
       actions: List<String>.from(map['actions'] ?? []),
+
+      // 🆕 NEW
+      keyPoints: List<String>.from(map['keyPoints'] ?? []),
+      riskLevel: map['riskLevel'] ?? "Low",
+      importance: map['importance'] ?? 0,
+      components: List<Map<String, dynamic>>.from(map['components'] ?? []),
     );
   }
 }

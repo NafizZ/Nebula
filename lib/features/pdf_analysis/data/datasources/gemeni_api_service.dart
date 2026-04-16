@@ -7,37 +7,67 @@ class GeminiApiService {
   Future<Map<String, dynamic>> analyze(String text) async {
     try {
       final response = await gemini.text('''
-Return ONLY JSON:
+Return ONLY valid JSON:
 
 {
-  "summary": "short summary",
+  "summary": "",
   "dates": [],
-  "actions": []
+  "actions": [],
+  "keyPoints": [],
+  "riskLevel": "Low",
+  "importance": 0,
+  "components": [
+    {
+      "type": "summary",
+      "content": ""
+    },
+    {
+      "type": "insights",
+      "riskLevel": "Low",
+      "importance": 0
+    },
+    {
+      "type": "keyPoints",
+      "items": []
+    },
+    {
+      "type": "timeline",
+      "items": []
+    },
+    {
+      "type": "actions",
+      "items": []
+    }
+  ]
 }
 
-Text:
+TEXT:
 $text
 ''');
 
       final output = response?.output ?? '';
 
-      final start = output.indexOf('{');
-      final end = output.lastIndexOf('}');
+      final jsonStart = output.indexOf('{');
+      final jsonEnd = output.lastIndexOf('}');
 
-      if (start == -1 || end == -1) {
-        throw Exception("Invalid AI response");
+      if (jsonStart == -1 || jsonEnd == -1) {
+        throw Exception("Invalid response format");
       }
 
-      final jsonString = output.substring(start, end + 1);
+      final jsonString = output.substring(jsonStart, jsonEnd + 1);
       final data = jsonDecode(jsonString);
 
-      return {
-        "summary": data["summary"] ?? "",
-        "dates": List<String>.from(data["dates"] ?? []),
-        "actions": List<String>.from(data["actions"] ?? []),
-      };
+      return data;
     } catch (e) {
-      return {"summary": "Error: $e", "dates": [], "actions": []};
+      return {
+        "summary": "Error: $e",
+        "dates": [],
+        "actions": [],
+        "keyPoints": [],
+        "riskLevel": "Low",
+        "importance": 0,
+        "components": [],
+      };
     }
   }
 }
