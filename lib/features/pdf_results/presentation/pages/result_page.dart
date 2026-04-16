@@ -4,33 +4,49 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nebula/features/pdf_results/presentation/cubit/pdf_result_cubit.dart';
 import 'package:nebula/features/pdf_results/presentation/cubit/pdf_result_state.dart';
 import 'package:nebula/features/pdf_results/presentation/pages/gen_ui_builder.dart';
+import 'package:nebula/features/pdf_results/presentation/widgets/design_scaffold.dart';
 
 class ResultPage extends StatelessWidget {
   const ResultPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('AI GenUI Result')),
-      body: BlocBuilder<PdfResultCubit, PdfResultState>(
-        builder: (context, state) {
-          final result = state.result;
+    return DSScaffold(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
 
-          if (result == null) {
-            return const Center(child: Text('No result'));
-          }
+        appBar: AppBar(
+          title: const Text('AI Overview'),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
 
-          final uiTree = result.uiTree;
+        body: BlocBuilder<PdfResultCubit, PdfResultState>(
+          builder: (context, state) {
+            final result = state.result;
 
-          if (uiTree == null) {
-            return Center(child: Text(result.summary));
-          }
+            if (state.status == PdfResultStatus.loading || result == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final uiTree = result.uiTree;
+            if (uiTree == null) {
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  result.summary.isEmpty
+                      ? "No content available"
+                      : result.summary,
+                ),
+              );
+            }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: GenUiRenderer.build(uiTree),
-          );
-        },
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: GenUiRenderer.build(uiTree),
+            );
+          },
+        ),
       ),
     );
   }

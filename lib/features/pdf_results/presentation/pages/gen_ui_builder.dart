@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:nebula/features/pdf_results/presentation/widgets/design_tokens.dart';
+import 'package:nebula/features/pdf_results/presentation/widgets/premium_card.dart';
 
 class GenUiRenderer {
   static Widget build(Map<String, dynamic> node, {int depth = 0}) {
-    if (node.isEmpty) return const SizedBox();
-    if (depth > 20) return const SizedBox();
+    if (node.isEmpty || depth > 25) return const SizedBox();
 
     final layout = node['layout'];
 
@@ -11,79 +12,81 @@ class GenUiRenderer {
       case 'column':
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: (node['children'] as List? ?? [])
-              .map((e) => build(e, depth: depth + 1))
-              .toList(),
+          children: _children(node, depth),
         );
 
       case 'row':
-        final childrenWidgets = (node['children'] as List? ?? [])
-            .map((e) => build(e, depth: depth + 1))
-            .toList();
+        final children = _children(node, depth);
 
-        final wrap = node['wrap'] == true;
+        final forceWrap = node['wrap'] == true;
+        final smartWrap = children.length > 3;
 
-        return wrap
-            ? Wrap(spacing: 8, runSpacing: 8, children: childrenWidgets)
-            : SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: childrenWidgets
-                      .map(
-                        (w) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: w,
-                        ),
-                      )
-                      .toList(),
-                ),
-              );
+        if (forceWrap || smartWrap) {
+          return Wrap(spacing: DS.sm, runSpacing: DS.sm, children: children);
+        }
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(children: children),
+        );
+
       case 'text':
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: DS.xs),
           child: Text(
             node['value'] ?? '',
             style: TextStyle(
               fontSize: (node['size'] ?? 14).toDouble(),
               fontWeight: node['bold'] == true
-                  ? FontWeight.bold
+                  ? FontWeight.w600
                   : FontWeight.normal,
-              color: node['color'] == 'muted' ? Colors.grey : Colors.black,
+              color: node['color'] == 'muted' ? Colors.grey : Colors.black87,
             ),
           ),
         );
+
       case 'card':
-        return Card(
-          elevation: 3,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: build({
-              "layout": "column",
-              "children": node['children'] ?? [],
-            }, depth: depth + 1),
-          ),
+        return DSCard(
+          child: GenUiRenderer.build({
+            "layout": "column",
+            "children": node['children'] ?? [],
+          }, depth: depth + 1),
         );
+
       case 'badge':
-        return Container(
-          margin: const EdgeInsets.all(4),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(
+            horizontal: DS.sm,
+            vertical: DS.xs,
+          ),
           decoration: BoxDecoration(
-            color: Colors.blue.shade100,
-            borderRadius: BorderRadius.circular(20),
+            color: DS.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: DS.primary.withOpacity(0.2)),
           ),
           child: Text(
             node['value'] ?? '',
-            style: const TextStyle(fontSize: 12),
+            style: const TextStyle(
+              fontSize: 12,
+              color: DS.primary,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         );
+
+      /// ---------------- SPACER ----------------
       case 'spacer':
-        return const SizedBox(height: 12);
+        return const SizedBox(height: DS.md);
+
       default:
         return const SizedBox();
     }
+  }
+
+  static List<Widget> _children(Map<String, dynamic> node, int depth) {
+    return (node['children'] as List? ?? [])
+        .map((e) => build(e, depth: depth + 1))
+        .toList();
   }
 }

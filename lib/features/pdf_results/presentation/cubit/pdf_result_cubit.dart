@@ -5,11 +5,11 @@ import 'pdf_result_state.dart';
 class PdfResultCubit extends Cubit<PdfResultState> {
   PdfResultCubit() : super(const PdfResultState());
 
-  void setResult(AnalysisResultEntity result) {
-    emit(PdfResultState(status: PdfResultStatus.ready, result: result));
+  void setLoading() {
+    emit(const PdfResultState(status: PdfResultStatus.loading));
   }
 
-  void clear() {
-    emit(const PdfResultState());
+  void setResult(AnalysisResultEntity result) {
+    emit(PdfResultState(status: PdfResultStatus.ready, result: result));
   }
 }
