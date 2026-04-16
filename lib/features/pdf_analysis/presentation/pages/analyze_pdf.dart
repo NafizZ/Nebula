@@ -21,6 +21,7 @@ class _AnalyzePdfState extends State<AnalyzePdf> {
     super.initState();
 
     Future.microtask(() {
+      context.read<PdfResultCubit>().clear();
       context.read<PdfAnalysisCubit>().analyzePdf(widget.filePath);
     });
   }

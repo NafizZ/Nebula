@@ -12,4 +12,8 @@ class PdfResultCubit extends Cubit<PdfResultState> {
   void setResult(AnalysisResultEntity result) {
     emit(PdfResultState(status: PdfResultStatus.ready, result: result));
   }
+
+  void clear() {
+    emit(const PdfResultState(status: PdfResultStatus.idle));
+  }
 }
