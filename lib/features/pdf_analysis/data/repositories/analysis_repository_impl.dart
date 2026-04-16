@@ -16,6 +16,20 @@ class AnalysisRepositoryImpl implements AnalysisRepository {
     required this.localAnalyzer,
   });
 
+  Future<Map<String, dynamic>> _retryGemini(
+    Future<Map<String, dynamic>> Function() call,
+  ) async {
+    for (int i = 0; i < 3; i++) {
+      try {
+        return await call();
+      } catch (e) {
+        print("⚠️ Retry ${i + 1} failed");
+        await Future.delayed(Duration(seconds: 2 * (i + 1)));
+      }
+    }
+    throw Exception("Gemini failed after retries");
+  }
+
   @override
   Future<AnalysisResultEntity> analyzePdf(String path) async {
     final text = await pdfParser.extractText(path);
@@ -27,8 +41,14 @@ class AnalysisRepositoryImpl implements AnalysisRepository {
     Map<String, dynamic> result;
 
     try {
-      result = await aiService.analyze(text);
-    } catch (_) {
+      final response = await _retryGemini(() => aiService.analyze(text));
+
+      print("🔥 AI RESPONSE: $response");
+
+      result = response;
+    } catch (e) {
+      print("❌ AI FAILED → local fallback: $e");
+
       result = localAnalyzer.analyze(text);
     }
 

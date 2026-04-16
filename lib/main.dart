@@ -7,6 +7,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   Gemini.init(apiKey: dotenv.get("API_KEY"));
+  print("API KEY: ${dotenv.env['API_KEY']}");
 
   runApp(Nebula());
 }

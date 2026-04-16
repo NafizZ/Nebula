@@ -5,39 +5,33 @@ class GeminiApiService {
   final gemini = Gemini.instance;
 
   Future<Map<String, dynamic>> analyze(String text) async {
-    try {
-      final response = await gemini.text('''
-Return ONLY JSON:
+    final response = await gemini.text('''
+Return ONLY valid JSON.
 
+Rules:
+- Must return object with "uiTree" key
+- uiTree must be a valid UI tree
+- Allowed layouts: column, row, text, card, badge, spacer
+
+Example:
 {
-  "summary": "short summary",
-  "dates": [],
-  "actions": []
+  "summary": "text",
+  "uiTree": {
+    "layout": "column",
+    "children": []
+  }
 }
 
-Text:
+TEXT:
 $text
 ''');
 
-      final output = response?.output ?? '';
+    final output = response?.output ?? '';
 
-      final start = output.indexOf('{');
-      final end = output.lastIndexOf('}');
+    final start = output.indexOf('{');
+    final end = output.lastIndexOf('}');
 
-      if (start == -1 || end == -1) {
-        throw Exception("Invalid AI response");
-      }
-
-      final jsonString = output.substring(start, end + 1);
-      final data = jsonDecode(jsonString);
-
-      return {
-        "summary": data["summary"] ?? "",
-        "dates": List<String>.from(data["dates"] ?? []),
-        "actions": List<String>.from(data["actions"] ?? []),
-      };
-    } catch (e) {
-      return {"summary": "Error: $e", "dates": [], "actions": []};
-    }
+    final jsonString = output.substring(start, end + 1);
+    return jsonDecode(jsonString);
   }
 }
